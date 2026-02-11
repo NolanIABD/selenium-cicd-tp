@@ -1,49 +1,131 @@
+ï»¿# TP Selenium CI/CD â€“ Calculatrice
 
-## Branche develop utilisée pour la PR
+## Objectif du TP
+CrÃ©er une application web simple (calculatrice), automatiser des tests Selenium, et mettre en place une CI/CD avec GitHub Actions.
 
 ---
 
-# 8. Questions finales du TP
+## Structure du projet
+- src/
+  - index.html
+  - style.css
+  - script.js
+- tests/
+  - requirements.txt
+  - test_selenium.py
+- .github/workflows/
+  - ci-cd.yml
 
-## 1. Avantages observés
+---
 
-### Quels sont les avantages de l'automatisation des tests que vous avez constatés ?
+## Ã‰tapes rÃ©alisÃ©es
 
+### 1) CrÃ©ation de lâ€™application web
+CrÃ©ation des fichiers dans `src/` :
+- `index.html` : formulaire + affichage du rÃ©sultat
+- `style.css` : mise en forme simple
+- `script.js` : calcul + gestion division par zÃ©ro
+
+Test manuel dans le navigateur.
+
+### 2) Mise en place Selenium + Pytest
+CrÃ©ation dâ€™un environnement virtuel :
+    py -m venv .venv
+Activation :
+    .\.venv\Scripts\Activate.ps1
+Installation dÃ©pendances :
+    pip install -r tests/requirements.txt
+
+CrÃ©ation des tests Selenium (Pytest) :
+- test chargement page
+- test addition
+- test division par zÃ©ro
+- test toutes opÃ©rations
+
+Utilisation de `WebDriverWait` et `Select` (plus stable que `sleep`).
+
+GÃ©nÃ©ration dâ€™un rapport HTML :
+    pytest -v --html=report.html --self-contained-html
+
+### 3) Mise en place CI/CD (GitHub Actions)
+CrÃ©ation du workflow :
+- installation Python
+- installation Chrome sur Ubuntu
+- installation dÃ©pendances
+- exÃ©cution des tests en headless avec CI=true
+- gÃ©nÃ©ration `test-report.html`
+- upload artifact `selenium-report`
+
+DÃ©clenchement sur :
+- push
+- pull_request
+
+### 4) Workflow Git
+- crÃ©ation branche `develop`
+- push de `develop`
+- crÃ©ation Pull Request `develop -> main`
+- validation CI verte
+- merge
+
+---
+
+## ProblÃ¨mes rencontrÃ©s et corrections
+
+### 1) Activation du venv bloquÃ©e (PowerShell)
+ProblÃ¨me : script `Activate.ps1` bloquÃ© par ExecutionPolicy.  
+Correction :
+    Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+
+### 2) Selenium WinError 193 (ChromeDriver)
+ProblÃ¨me : `%1 nâ€™est pas une application Win32 valide` avec webdriver-manager.  
+Correction : suppression webdriver-manager et utilisation de Selenium Manager natif (webdriver.Chrome sans driver externe).
+
+### 3) Repo Git non liÃ© au remote
+ProblÃ¨me : `No configured push destination`.  
+Correction :
+    git remote add origin <repo_url>
+    git push -u origin main
+
+### 4) __pycache__ commitÃ©
+ProblÃ¨me : fichiers Python gÃ©nÃ©rÃ©s suivis par Git.  
+Correction :
+    ajout `.gitignore`
+    git rm -r --cached __pycache__
+
+---
+
+## Questions finales du TP
+
+### 1. Avantages observÃ©s
+
+**Quels sont les avantages de l'automatisation des tests que vous avez constatÃ©s ?**  
 Les tests se lancent automatiquement sans intervention manuelle.  
-On gagne du temps et on détecte rapidement les erreurs après une modification.
+On gagne du temps et on dÃ©tecte rapidement les erreurs aprÃ¨s une modification.
 
-### Comment le CI/CD améliore-t-il la qualité du code ?
+**Comment le CI/CD amÃ©liore-t-il la qualitÃ© du code ?**  
+Le pipeline vÃ©rifie automatiquement que les tests passent avant un merge.  
+Cela Ã©vite dâ€™intÃ©grer du code cassÃ© dans la branche principale.
 
-Le pipeline vérifie automatiquement que les tests passent avant un merge.  
-Cela évite d’intégrer du code cassé dans la branche principale.
+### 2. DÃ©fis rencontrÃ©s
 
----
+**Quelles difficultÃ©s avez-vous rencontrÃ©es avec Selenium ?**  
+Jâ€™ai eu une erreur de driver Chrome (WinError 193).  
+Jâ€™ai dÃ» adapter la configuration pour lâ€™exÃ©cution en CI.
 
-## 2. Défis rencontrés
+**Comment pourriez-vous amÃ©liorer la stabilitÃ© des tests ?**  
+Utiliser `WebDriverWait` au lieu de `time.sleep`.  
+Garder une config headless propre pour la CI.  
+Structurer mieux les tests (ex : Page Object Pattern).
 
-### Quelles difficultés avez-vous rencontrées avec Selenium ?
+### 3. MÃ©triques
 
-J’ai rencontré une erreur liée au driver Chrome (WinError 193).  
-Il y a aussi eu un problème d’exécution en environnement CI.
+**Quelles mÃ©triques sont les plus importantes pour votre projet ?**  
+Le nombre de tests rÃ©ussis / Ã©chouÃ©s.  
+Le temps dâ€™exÃ©cution des tests.  
+La stabilitÃ© du pipeline CI.
 
-### Comment pourriez-vous améliorer la stabilité des tests ?
+**Comment mesurer l'efficacitÃ© de votre pipeline CI/CD ?**  
+VÃ©rifier que les tests se lancent Ã  chaque push/PR.  
+Surveiller le taux de succÃ¨s des runs.  
+VÃ©rifier que le rapport de test est gÃ©nÃ©rÃ© et disponible en artifact.
 
-En utilisant WebDriverWait au lieu de time.sleep.  
-En configurant correctement le mode headless pour la CI.  
-En structurant mieux les tests.
-
----
-
-## 3. Métriques
-
-### Quelles métriques sont les plus importantes pour votre projet ?
-
-Le nombre de tests réussis / échoués.  
-Le temps d’exécution des tests.  
-La stabilité du pipeline CI.
-
-### Comment mesurer l'efficacité de votre pipeline CI/CD ?
-
-En vérifiant que les tests s’exécutent automatiquement à chaque push.  
-En surveillant le taux de succès des builds.  
-En vérifiant que les rapports de tests sont générés correctement.
